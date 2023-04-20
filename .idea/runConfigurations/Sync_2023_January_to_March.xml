@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Sync 2023 January to March" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="dev.ja.sync.Main" />
+    <module name="buchhaltungsbutler-wise-sync.main" />
+    <option name="PROGRAM_PARAMETERS" value="config.yaml 2023-01 2023-03" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
