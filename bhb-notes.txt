@@ -1,0 +1,3 @@
+- Welche Zeitzone wird für Datumangaben verwende?
+- Request "/transactions/get" liefert unvollständige Daten für die Transaktionen, bspw. fehlt die Eigenschaften "currency".
+- Es gibt keine Möglichkeitn, über "/comments/add" angelegte Anmerkungen wieder abzufragen.

@@ -1,0 +1,16 @@
+bhb_api_client: "BHB API client name"
+bhb_api_secret: "BHB API secret"
+bhb_api_key: "BHB API key"
+bhb_accounts:
+  1200: "USD"
+  1210: "EUR"
+bhb_fee_id: 4970,
+wise_api_key: "Wise.com API key"
+wise_private_key: |+
+  -----BEGIN PRIVATE KEY-----
+  
+  Your Wise.com PRIVATE key. 
+  
+  You must have uploaded the PUBLIC part to your Wise.com account.
+  
+  -----END PRIVATE KEY-----
