@@ -30,15 +30,22 @@ data class SyncConfig(
         @SerialName("wise_private_key")
         val wisePrivateKey: String,
         @SerialName("read_only")
-        val readOnly: Boolean? = false
-) {
-    val unknownSender = "Unbekannt"
+        val readOnly: Boolean? = false,
 
-    val wiseSenderLabel: String = "Wise.com"
-    val wiseFeeLabel: String = "Wise.com Gebühren"
-    val wiseCashbackLabel: String = "Wise.com Cashback"
-    fun wiseConversionLabel(from: Currency, to: Currency): String {
-        return "Wise.com ${from.id} - ${to.id}"
+        // labels
+        @SerialName("label_unknown_sender")
+        val unknownSender: String = "Unbekannt",
+        @SerialName("label_wise_sender")
+        val wiseSenderLabel: String = "Wise",
+        @SerialName("label_wise_fee")
+        val wiseFeeLabel: String = "Wise Gebühren",
+        @SerialName("label_wise_cashback")
+        val wiseCashbackLabel: String = "Wise Cashback",
+        @SerialName("label_wise_conversion")
+        val wiseConversionLabel: String = "Wise \$from - \$to",
+) {
+    fun wiseConversionLabel(sourceCurrency: Currency, targetCurrency: Currency): String {
+        return this.wiseConversionLabel.replace("\$from", sourceCurrency.id).replace("\$to", targetCurrency.id)
     }
 
     companion object {
