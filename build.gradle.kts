@@ -3,6 +3,7 @@ val ktorVersion: String by project
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.8.20"
     kotlin("plugin.serialization") version "1.8.20"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     application
 }
 
@@ -14,7 +15,7 @@ repositories {
 }
 
 application {
-    mainClass.set("dev.ja.bhbWiseSync.MainKt")
+    mainClass.set("dev.ja.sync.Main")
 }
 
 dependencies {

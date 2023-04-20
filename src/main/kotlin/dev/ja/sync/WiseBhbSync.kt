@@ -37,7 +37,9 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
 
         val firstDay = fromMonth.atDay(1).toKotlinLocalDate()
         val lastDay = toMonth.atEndOfMonth().toKotlinLocalDate()
-        println("Syncing Wise to Buchhaltungsbutler: $firstDay - $lastDay...")
+
+        val readOnlyLabel = if (syncConfig.readOnly == true) " (Read-Only Mode)" else ""
+        println("Syncing Wise to Buchhaltungsbutler$readOnlyLabel: $firstDay - $lastDay...")
 
         val wiseData = collectWiseData(wiseClient, firstDay, lastDay)
         val bhbData = collectBhbData(bhbClient, firstDay, lastDay, syncConfig.bhbAccountToWiseCurrency.keys.toList())
