@@ -39,6 +39,8 @@ data class SyncConfig(
         val wiseSenderLabel: String = "Wise",
         @SerialName("label_wise_fee")
         val wiseFeeLabel: String = "Wise Gebühren",
+        @SerialName("label_wise_fee_conversion")
+        val wiseFeeLabelConversion: String = "Wise Gebühren Währungstausch",
         @SerialName("label_wise_cashback")
         val wiseCashbackLabel: String = "Wise Cashback",
         @SerialName("label_wise_conversion")

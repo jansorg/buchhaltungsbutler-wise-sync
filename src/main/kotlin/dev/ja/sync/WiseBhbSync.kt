@@ -211,7 +211,7 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         ))
 
         if (syncFeeTransaction) {
-            transactions += createWiseFeeTransactionItem(bhbAccountId, wiseTransaction)
+            transactions += createWiseFeeTransactionItem(bhbAccountId, wiseTransaction, WiseFeeType.TransferOrDeposit)
         }
 
         bhbClient.addBatchTransactions(transactions).also { transactionIds ->
@@ -243,7 +243,7 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         ))
 
         if (syncFeeTransaction) {
-            transactions += createWiseFeeTransactionItem(bhbAccountId, wiseTransaction)
+            transactions += createWiseFeeTransactionItem(bhbAccountId, wiseTransaction, WiseFeeType.TransferOrDeposit)
         }
 
         bhbClient.addBatchTransactions(transactions).also { transactionIds ->
@@ -270,7 +270,7 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         ))
 
         if (syncFeeTransaction) {
-            transactions += createWiseFeeTransactionItem(bhbAccountId, wiseTransaction)
+            transactions += createWiseFeeTransactionItem(bhbAccountId, wiseTransaction, WiseFeeType.Conversion)
         }
 
         bhbClient.addBatchTransactions(transactions).also { transactionIds ->
@@ -310,14 +310,14 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         ))
     }
 
-    private fun createWiseFeeTransactionItem(bhbAccountId: AccountId, wiseTransaction: Transaction): AddTransaction {
+    private fun createWiseFeeTransactionItem(bhbAccountId: AccountId, wiseTransaction: Transaction, wiseFeeType: WiseFeeType): AddTransaction {
         return AddTransaction(
                 bhbAccountId,
                 syncConfig.wiseSenderLabel,
                 -wiseTransaction.totalFees.value,
                 wiseTransaction.date.toLocalDateTime(bhbLocalTimeZone),
                 Currency.of(wiseTransaction.totalFees.currency.id),
-                bookingText = feeTextWithSyncId(wiseTransaction)
+                bookingText = feeTextWithSyncId(wiseTransaction, wiseFeeType)
         )
     }
 
@@ -325,8 +325,8 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         return listOfNotNull(text, "$wiseIdPrefix${transaction.referenceNumber}").joinToString(",\n")
     }
 
-    private fun feeTextWithSyncId(transaction: Transaction, text: String? = syncConfig.wiseFeeLabel): String {
-        return listOfNotNull(text, "$wiseFeeIdPrefix${transaction.referenceNumber}").joinToString(",\n")
+    private fun feeTextWithSyncId(transaction: Transaction, type: WiseFeeType): String {
+        return listOfNotNull(type.label(syncConfig), "$wiseFeeIdPrefix${transaction.referenceNumber}").joinToString(",\n")
     }
 
     private fun createBhbClient(): BhbClient {
@@ -339,5 +339,17 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
 
     private fun Transaction.needsFeeSync(): Boolean {
         return totalFees.isNonZero
+    }
+
+    enum class WiseFeeType {
+        Conversion,
+        TransferOrDeposit;
+
+        fun label(syncConfig: SyncConfig): String {
+            return when (this) {
+                Conversion -> syncConfig.wiseFeeLabelConversion
+                TransferOrDeposit -> syncConfig.wiseFeeLabel
+            }
+        }
     }
 }
