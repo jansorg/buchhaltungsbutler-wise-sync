@@ -32,7 +32,7 @@ If you'd like to be careful, I suggest the following:
 - Tags BuchhaltungsButler transactions with the Wise reference number to avoid duplicate synchronization. Multiple
   invocations of program **will not** create multiple transactions in BuchhaltungsButler for the same Wise transaction.
 
-## Building The Software
+## Building the Software
 
 Gradle is used a build system.
 I recommend to install Java 17 or later on the host system.
@@ -105,13 +105,13 @@ java -jar ./build/libs/buchhaltungsbutler-wise-sync-all.jar config.yaml year-mon
 
 #### Examples
 
-##### Synchronize all data of January 2023
+##### Synchronize All Data of January 2023
 
 ```bash
 java -jar ./build/libs/buchhaltungsbutler-wise-sync-all.jar config.yaml 2023-01
 ```
 
-##### Synchronize the first quarter of 2023
+##### Synchronize the First Quarter of 2023
 
 ```bash
 java -jar ./build/libs/buchhaltungsbutler-wise-sync-all.jar config.yaml 2023-01 2023-03
@@ -128,16 +128,16 @@ No modifications to your Wise data are made, even in the regular mode of synchro
 java -jar ./build/libs/buchhaltungsbutler-wise-sync-all.jar --read-only config.yaml 2023-01 2023-06
 ```
 
-## Limitations of This Software
+## Limitations
 
 Unfortunately, the API of BuchhaltungsButler is pretty weak.
 
 It does not provide a way to retrieve the exchange rate for newly created transactions.
 
 This makes it impossible to automatically add "postings" to the newly created transactions, e.g. to mark the
-transactions with the needed DATEV account it.
+transactions with the needed DATEV account id.
 
-## Kotlin client to Wise and BuchhaltungsButler APIs
+## Kotlin Client to Wise and BuchhaltungsButler APIs
 
 This software includes a partial implementation of API clients to the APIs of Wise and BuchhaltungsButler.
 The implementation is based on Kotlin and is using ktor for the HTTP abstraction.
