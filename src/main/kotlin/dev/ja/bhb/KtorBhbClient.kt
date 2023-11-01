@@ -13,6 +13,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.plugins.resources.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.SerialName
@@ -68,6 +69,12 @@ class KtorBhbClient(
     }
 
     override suspend fun getAccounts(): AccountsResponse {
+        val json = httpClient.post("$basePath/accounts/get") {
+            setBody(newRequest { })
+        }.bodyAsText()
+
+        println(json)
+
         return httpClient.post("$basePath/accounts/get") {
             setBody(newRequest { })
         }.body<ResponseWrapper<AccountsResponse>>().data

@@ -8,9 +8,9 @@ typealias AccountsResponse = List<Account>
 
 @Serializable
 data class Account(
-        @SerialName("name")
-        val name: String,
+    @SerialName("name")
+    val name: String,
 
-        @SerialName("postingaccount_number")
-        val accountNumber: AccountId
+    @SerialName("postingaccount_number")
+    val accountNumber: AccountId?
 )

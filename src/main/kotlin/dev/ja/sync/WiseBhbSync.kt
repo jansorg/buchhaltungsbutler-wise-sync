@@ -5,10 +5,7 @@ import dev.ja.bhb.KtorBhbClient
 import dev.ja.bhb.ReadOnlyBhbClient
 import dev.ja.bhb.model.AccountId
 import dev.ja.bhb.model.Vat
-import dev.ja.bhb.requests.AddTransaction
-import dev.ja.bhb.requests.AddTransactionPosting
-import dev.ja.bhb.requests.GetTransactions
-import dev.ja.bhb.requests.PostingItem
+import dev.ja.bhb.requests.*
 import dev.ja.model.Currency
 import dev.ja.sync.model.CollectedBhbData
 import dev.ja.sync.model.CollectedWiseData
@@ -52,13 +49,15 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         }
     }
 
-    private suspend fun syncWiseToBhb(currency: Currency,
-                                      wiseData: CollectedWiseData,
-                                      bhbData: CollectedBhbData,
-                                      bhbAccountId: AccountId,
-                                      bhbClient: BhbClient) {
+    private suspend fun syncWiseToBhb(
+        currency: Currency,
+        wiseData: CollectedWiseData,
+        bhbData: CollectedBhbData,
+        bhbAccountId: AccountId,
+        bhbClient: BhbClient
+    ) {
         val statement = wiseData.statements[currency]
-                ?: throw IllegalStateException("missing statement for $currency")
+            ?: throw IllegalStateException("missing statement for $currency")
 
         val notSynced = statement.transactions.filterNot { it.referenceNumber in bhbData.syncedWiseTransactions }
         println("   Syncing ${notSynced.size} transaction from Wise.com to BHB...")
@@ -108,9 +107,9 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         // not every Wise transaction has a fee, but every one with a fee must have been synced already
         if (bhbData.isNotEmpty) {
             val wiseTransactionsWithFee = wiseData.statements.values.asSequence().flatMap { it.transactions }
-                    .filter { it.needsFeeSync() }
-                    .map { it.referenceNumber }
-                    .toSet()
+                .filter { it.needsFeeSync() }
+                .map { it.referenceNumber }
+                .toSet()
 
             if (!bhbData.syncedWiseTransactions.containsAll(bhbData.syncedWiseTransactionFees)) {
                 throw IllegalStateException("BuchhaltungsButler is out-of-sync: missing transaction for fee transactions")
@@ -139,17 +138,21 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
 
         if (transaction.details.type == TransactionType.Conversion) {
             transaction.details.sourceAmount?.currency
-                    ?: throw IllegalStateException("missing source amount currency: $transaction")
+                ?: throw IllegalStateException("missing source amount currency: $transaction")
             transaction.details.targetAmount?.currency
-                    ?: throw IllegalStateException("missing target amount currency: $transaction")
+                ?: throw IllegalStateException("missing target amount currency: $transaction")
         }
     }
 
-    private suspend fun collectWiseData(wiseClient: WiseClient, intervalStart: LocalDate, intervalEnd: LocalDate): CollectedWiseData {
+    private suspend fun collectWiseData(
+        wiseClient: WiseClient,
+        intervalStart: LocalDate,
+        intervalEnd: LocalDate
+    ): CollectedWiseData {
         println("Fetching data from Wise.com...")
 
         val profile = wiseClient.getProfiles().firstOrNull { it.type == ProfileType.Business }
-                ?: throw IllegalStateException("Unable to locate Wise Business profile")
+            ?: throw IllegalStateException("Unable to locate Wise Business profile")
 
         // from "startDate 00:00:00" to "next day after endDate 00:00:00" to include all of the last day
         val intervalStartTime = intervalStart.atStartOfDayIn(TimeZone.UTC)
@@ -164,13 +167,15 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         return CollectedWiseData(profile, currencyToBalance.keys, currencyToBalance, statements)
     }
 
-    private suspend fun collectBhbData(bhbClient: BhbClient,
-                                       firstDay: LocalDate,
-                                       lastDay: LocalDate,
-                                       accountIds: List<AccountId>): CollectedBhbData {
+    private suspend fun collectBhbData(
+        bhbClient: BhbClient,
+        firstDay: LocalDate,
+        lastDay: LocalDate,
+        accountIds: List<AccountId>
+    ): CollectedBhbData {
         println("Fetching data from Buchhaltungsbutler...")
         val accounts = bhbClient.getAccounts()
-        val existingAccountIds = accounts.map { it.accountNumber }
+        val existingAccountIds = accounts.mapNotNull(Account::accountNumber)
 
         // only fetch transactions of existing accounts, validation of the configured accounts happens later
         val idToTransactions = accountIds.filter { it in existingAccountIds }.associateWith { id ->
@@ -193,12 +198,18 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
      * Fees may have been applied for the transfer.
      * It creates an item for the total amount and optionally another item for the fee.
      */
-    private suspend fun syncWiseDeposit(bhbAccountId: AccountId, wiseTransaction: Transaction, bhbClient: BhbClient, syncFeeTransaction: Boolean) {
+    private suspend fun syncWiseDeposit(
+        bhbAccountId: AccountId,
+        wiseTransaction: Transaction,
+        bhbClient: BhbClient,
+        syncFeeTransaction: Boolean
+    ) {
         if (wiseTransaction.amount.value < 0) {
             throw IllegalStateException("Negative deposit amount are unsupported")
         }
 
-        val transactions = mutableListOf(AddTransaction(
+        val transactions = mutableListOf(
+            AddTransaction(
                 bhbAccountId,
                 wiseTransaction.details.senderName ?: syncConfig.unknownSender,
                 // amount excludes the fee, amount+fee was sent by the sender
@@ -208,7 +219,8 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
                 bookingText = bookingTextWithSyncId(wiseTransaction),
                 // not adding account number, because it may not be an IBAN, e.g. for USD accounts
                 //accountNumber = wiseTransaction.details.recipient?.bankAccount,
-        ))
+            )
+        )
 
         if (syncFeeTransaction) {
             transactions += createWiseFeeTransactionItem(bhbAccountId, wiseTransaction, WiseFeeType.TransferOrDeposit)
@@ -226,12 +238,18 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
      * Fees may have been applied for the transfer.
      * It creates an item for the total amount and optionally another item for the fee.
      */
-    private suspend fun syncWiseTransfer(bhbAccountId: AccountId, wiseTransaction: Transaction, bhbClient: BhbClient, syncFeeTransaction: Boolean) {
+    private suspend fun syncWiseTransfer(
+        bhbAccountId: AccountId,
+        wiseTransaction: Transaction,
+        bhbClient: BhbClient,
+        syncFeeTransaction: Boolean
+    ) {
         if (wiseTransaction.type == CreditType.Credit) {
             throw IllegalStateException("CREDIT transfers are not supported")
         }
 
-        val transactions = mutableListOf(AddTransaction(
+        val transactions = mutableListOf(
+            AddTransaction(
                 bhbAccountId,
                 wiseTransaction.details.recipient?.name ?: wiseTransaction.details.senderName ?: "unknown",
                 // always negative amount, fee is always positive
@@ -240,7 +258,8 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
                 Currency.of(wiseTransaction.amount.currency.id),
                 bookingText = bookingTextWithSyncId(wiseTransaction),
                 accountNumber = wiseTransaction.details.recipient?.bankAccount,
-        ))
+            )
+        )
 
         if (syncFeeTransaction) {
             transactions += createWiseFeeTransactionItem(bhbAccountId, wiseTransaction, WiseFeeType.TransferOrDeposit)
@@ -253,12 +272,18 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         }
     }
 
-    private suspend fun syncWiseConversion(bhbAccountId: AccountId, wiseTransaction: Transaction, bhbClient: BhbClient, syncFeeTransaction: Boolean) {
+    private suspend fun syncWiseConversion(
+        bhbAccountId: AccountId,
+        wiseTransaction: Transaction,
+        bhbClient: BhbClient,
+        syncFeeTransaction: Boolean
+    ) {
         // these were validated
         val sourceCurrency = wiseTransaction.details.sourceAmount?.currency!!
         val targetCurrency = wiseTransaction.details.targetAmount?.currency!!
 
-        val transactions = mutableListOf(AddTransaction(
+        val transactions = mutableListOf(
+            AddTransaction(
                 bhbAccountId,
                 syncConfig.wiseConversionLabel(sourceCurrency, targetCurrency),
                 // conversion of the total amount (credited value + conversion fee)
@@ -267,7 +292,8 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
                 Currency.of(wiseTransaction.amount.currency.id),
                 bookingText = bookingTextWithSyncId(wiseTransaction),
                 accountNumber = wiseTransaction.details.recipient?.bankAccount,
-        ))
+            )
+        )
 
         if (syncFeeTransaction) {
             transactions += createWiseFeeTransactionItem(bhbAccountId, wiseTransaction, WiseFeeType.Conversion)
@@ -299,34 +325,50 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         bhbClient.addPosting(AddTransactionPosting(id, listOf(posting)))
     }
 
-    private suspend fun syncWiseBalanceCashback(bhbAccountId: AccountId, wiseTransaction: Transaction, bhbClient: BhbClient) {
-        bhbClient.addTransaction(AddTransaction(
+    private suspend fun syncWiseBalanceCashback(
+        bhbAccountId: AccountId,
+        wiseTransaction: Transaction,
+        bhbClient: BhbClient
+    ) {
+        bhbClient.addTransaction(
+            AddTransaction(
                 bhbAccountId,
                 syncConfig.wiseSenderLabel,
                 wiseTransaction.amount.value,
                 wiseTransaction.date.toLocalDateTime(bhbLocalTimeZone),
                 Currency.of(wiseTransaction.amount.currency.id),
                 bookingText = bookingTextWithSyncId(wiseTransaction, syncConfig.wiseCashbackLabel)
-        ))
-    }
-
-    private fun createWiseFeeTransactionItem(bhbAccountId: AccountId, wiseTransaction: Transaction, wiseFeeType: WiseFeeType): AddTransaction {
-        return AddTransaction(
-                bhbAccountId,
-                syncConfig.wiseSenderLabel,
-                -wiseTransaction.totalFees.value,
-                wiseTransaction.date.toLocalDateTime(bhbLocalTimeZone),
-                Currency.of(wiseTransaction.totalFees.currency.id),
-                bookingText = feeTextWithSyncId(wiseTransaction, wiseFeeType)
+            )
         )
     }
 
-    private fun bookingTextWithSyncId(transaction: Transaction, text: String? = transaction.details.paymentReference): String {
+    private fun createWiseFeeTransactionItem(
+        bhbAccountId: AccountId,
+        wiseTransaction: Transaction,
+        wiseFeeType: WiseFeeType
+    ): AddTransaction {
+        return AddTransaction(
+            bhbAccountId,
+            syncConfig.wiseSenderLabel,
+            -wiseTransaction.totalFees.value,
+            wiseTransaction.date.toLocalDateTime(bhbLocalTimeZone),
+            Currency.of(wiseTransaction.totalFees.currency.id),
+            bookingText = feeTextWithSyncId(wiseTransaction, wiseFeeType)
+        )
+    }
+
+    private fun bookingTextWithSyncId(
+        transaction: Transaction,
+        text: String? = transaction.details.paymentReference
+    ): String {
         return listOfNotNull(text, "$wiseIdPrefix${transaction.referenceNumber}").joinToString(",\n")
     }
 
     private fun feeTextWithSyncId(transaction: Transaction, type: WiseFeeType): String {
-        return listOfNotNull(type.label(syncConfig), "$wiseFeeIdPrefix${transaction.referenceNumber}").joinToString(",\n")
+        return listOfNotNull(
+            type.label(syncConfig),
+            "$wiseFeeIdPrefix${transaction.referenceNumber}"
+        ).joinToString(",\n")
     }
 
     private fun createBhbClient(): BhbClient {
