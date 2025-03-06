@@ -1,10 +1,10 @@
 package dev.ja.sync.model
 
+import com.charleskorn.kaml.Yaml
 import dev.ja.bhb.model.AccountId
 import dev.ja.model.Currency
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import net.mamoe.yamlkt.Yaml
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -52,7 +52,7 @@ data class SyncConfig(
 
     companion object {
         fun loadFromYaml(filePath: Path): SyncConfig {
-            return Yaml.decodeFromString(serializer(), Files.readString(filePath))
+            return Yaml.default.decodeFromString(serializer(), Files.readString(filePath))
         }
     }
 }
