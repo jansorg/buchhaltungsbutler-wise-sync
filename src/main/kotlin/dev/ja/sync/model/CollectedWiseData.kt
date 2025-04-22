@@ -8,6 +8,5 @@ import dev.ja.wise.model.Profile
 data class CollectedWiseData(
         val profile: Profile,
         val currencies: Set<Currency>,
-        val balances: Map<Currency, Balance>,
         val statements: Map<Currency, FlatBalanceStatement>
 )

@@ -1,46 +1,15 @@
 package dev.ja.wise.model
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import dev.ja.model.Currency
 
-@Serializable
 data class TransactionDetails(
-        @SerialName("type")
-        val type: TransactionType,
-
-        @SerialName("description")
-        val description: String,
-
-        @SerialName("amount")
-        val amount: Amount? = null,
-
-        @SerialName("sourceAmount")
-        val sourceAmount: Amount? = null,
-
-        @SerialName("targetAmount")
-        val targetAmount: Amount? = null,
-
-        @SerialName("fee")
-        val conversionFee: Amount? = null,
-
-        @SerialName("rate")
-        val rate: Double? = null,
-
-        @SerialName("senderName")
-        val senderName: String? = null,
-
-        @SerialName("senderAccount")
-        val senderAccount: String? = null,
-
-        @SerialName("recipient")
-        val recipient: TransactionRecipient? = null,
-
-        @SerialName("paymentReference")
-        val paymentReference: String? = null,
-
-        @SerialName("category")
-        val category: String? = null,
-
-        @SerialName("merchant")
-        val merchant: Merchant? = null,
+    val type: TransactionType,
+    val amount: Amount? = null,
+    // only defined for money conversions
+    val sourceCurrency: Currency? = null,
+    // only defined for money conversions
+    val targetCurrency: Currency? = null,
+    val senderName: String? = null,
+    val recipient: TransactionRecipient? = null,
+    val paymentReference: String? = null,
 )

@@ -2,7 +2,7 @@
   <configuration default="false" name="Sync Wise.com / BHB (read-only)" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="dev.ja.sync.Main" />
     <module name="buchhaltungsbutler-wise-sync.main" />
-    <option name="PROGRAM_PARAMETERS" value="--read-only config.yaml 2023-10" />
+    <option name="PROGRAM_PARAMETERS" value="--read-only config.yaml 2025-03" />
     <shortenClasspath name="NONE" />
     <method v="2">
       <option name="Make" enabled="true" />

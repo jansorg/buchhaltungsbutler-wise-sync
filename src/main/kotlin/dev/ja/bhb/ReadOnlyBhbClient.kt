@@ -11,11 +11,15 @@ import dev.ja.bhb.requests.AddTransactionPosting
  */
 class ReadOnlyBhbClient(private val delegate: BhbClient) : BhbClient by delegate {
     override suspend fun addTransaction(transaction: AddTransaction): TransactionId {
+        println("   BHB.addTransaction: $transaction")
         // read-only
         return ""
     }
 
     override suspend fun addBatchTransactions(transactions: List<AddTransaction>): List<TransactionId> {
+        for (transaction in transactions) {
+            println("            $transaction")
+        }
         // read-only
         return emptyList()
     }
@@ -26,5 +30,6 @@ class ReadOnlyBhbClient(private val delegate: BhbClient) : BhbClient by delegate
 
     override suspend fun addComment(comment: AddComment) {
         // read-only
+        println("         BHB.addComment: $comment")
     }
 }

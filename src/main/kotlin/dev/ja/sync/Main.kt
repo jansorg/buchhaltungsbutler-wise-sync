@@ -38,10 +38,9 @@ object Main {
                 else -> firstMonth
             }
         } catch (e: DateTimeParseException) {
-            System.err.println("Error parsing year-month: " + argsList[0])
+            System.err.println("Error parsing year-month: " + argsList[0] + ", error: " + e.message)
             exitProcess(1)
         }
-
 
         runBlocking {
             WiseBhbSync(createSyncConfig(readOnly, configFile)).sync(firstMonth, lastMonth)
