@@ -1,13 +1,18 @@
 package dev.ja.wise.model
 
+import jakarta.xml.bind.annotation.XmlEnum
+import jakarta.xml.bind.annotation.XmlEnumValue
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class CreditType(val wiseId: String) {
+@XmlEnum
+enum class CreditType {
     @SerialName("DEBIT")
-    Debit("DEBIT"),
+    @XmlEnumValue("DBIT")
+    Debit,
 
     @SerialName("CREDIT")
-    Credit("CREDIT"),
+    @XmlEnumValue("CRDT")
+    Credit,
 }

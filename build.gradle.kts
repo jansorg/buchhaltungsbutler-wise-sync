@@ -31,6 +31,7 @@ dependencies {
     // XML serialization
     // https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
+    runtimeOnly("com.sun.xml.bind:jaxb-impl:4.0.5")
 
     // for Transferwise digital-signatures copy
     implementation("org.bouncycastle:bcprov-jdk18on:1.80")
