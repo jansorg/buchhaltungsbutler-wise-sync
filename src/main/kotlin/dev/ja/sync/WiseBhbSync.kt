@@ -161,6 +161,7 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
                     .map { entry ->
                         val amount = entry.amount!!.toWiseAmount()
                         val isWiseCashback = entry.additionalInformation == "Balance cashback"
+                                || entry.additionalInformation == "Cashback"
 
                         val transactionType = when {
                             entry.amountDetails?.transactionAmount?.currencyExchange != null -> TransactionType.Conversion

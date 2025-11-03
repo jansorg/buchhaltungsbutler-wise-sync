@@ -38,7 +38,7 @@ data class SyncConfig(
     @SerialName("label_unknown_sender")
     val unknownSender: String = "Unbekannt",
     @SerialName("label_wise_sender")
-    val wiseSenderLabel: String = "Wise",
+    val wiseSenderLabel: String = "Wise Europe SA",
     @SerialName("label_wise_fee")
     val wiseFeeLabel: String = "Wise Gebühren",
     @SerialName("label_wise_fee_conversion")
