@@ -152,11 +152,11 @@ class WiseBhbSync(private val syncConfig: SyncConfig) {
         val currencyTransactions = camt053Statements
             .groupBy { it.statement?.account?.currency!! }
             .map { (currency, statements) ->
-                val transactions = statements.flatMap { it.statement!!.statementEntries!! }
+                val transactions = statements.flatMap { it.statement?.statementEntries ?: emptyList() }
                     .sortedBy { it.bookingDate!!.value }
                     .filter {
                         val date = it.bookingDate!!.value!!
-                        date >= intervalStartTime && date <= intervalEndTime
+                        date in intervalStartTime..intervalEndTime
                     }
                     .map { entry ->
                         val amount = entry.amount!!.toWiseAmount()
